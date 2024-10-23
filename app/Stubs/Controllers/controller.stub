@@ -1,0 +1,70 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\DataTables\{{ caps_name }}DataTable;
+use App\Models\{{ model }};
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
+class {{ caps_name }}Controller extends Controller
+{
+    public function index({{ caps_name }}DataTable $datatable)
+    {
+        return $datatable->render('{{ name }}.index');
+    }
+
+    public function create(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|min:3|max:100',
+        ]);
+
+        {{ model }}::create($request->all());
+
+        return response()->json(['success' => true, 'message' => '{{ caps_name }} created successfully', '_token' => csrf_token()]);
+    }
+
+    public function edit($id)
+    {
+        ${{ name }} = {{ model }}::find($id);
+
+        if (!${{ name }}) {
+            return response()->json(['success' => false, 'message' => '{{ caps_name }} not found'], 404);
+        }
+
+        return response()->json(['success' => true, 'data' => ${{ name }}, '_token' => csrf_token()]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' =>'required|min:3|max:100'
+        ]);
+
+        ${{ name }} = {{ model }}::find($id);
+
+        if (!${{ name }}) {
+            return response()->json(['success' => false, 'message' => '{{ caps_name }} not found'], 404);
+        }
+
+        $update = $request->all();
+
+        ${{ name }}->update($update);
+
+        return response()->json(['success' => true, 'message' => '{{ caps_name }} update successfully', '_token' => csrf_token()]);
+    }
+
+    public function destroy($id)
+    {
+        ${{ name }} = {{ model }}::find($id);
+
+        if (!${{ name }}) {
+            return response()->json(['success' => true, 'message' => '{{ caps_name }} not found'], 404);
+        }
+
+        ${{ name }}->delete();
+
+        return response()->json(['success' => true, 'message' => '{{ caps_name }} deleted successfully', '_token' => csrf_token()]);
+    }
+}

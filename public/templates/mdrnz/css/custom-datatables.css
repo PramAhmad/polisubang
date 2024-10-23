@@ -1,0 +1,9 @@
+.table-responsive {
+    overflow-y: hidden !important;
+}
+.dataTables_info {
+    margin-bottom: 1.5rem;
+}
+.dataTables_wrapper {
+    margin-bottom: 20px !important;
+}
