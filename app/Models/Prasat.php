@@ -13,7 +13,10 @@ class Prasat extends Model
     {
         return $this->belongsTo(Pengajuan::class);
     }
-
+    public function peminjaman()
+    {
+        return $this->belongsTo(Peminjaman::class);
+    }
     // barang by prasat
     public function barangByPrasat()
     {

@@ -9,7 +9,7 @@ class Pengajuan extends Model
 {
     use HasFactory;
     protected $table = 'pengajuan';
-    protected $fillable = ['user_id', 'matakuliah_id', 'name', 'status',''];
+    protected $fillable = ['user_id', 'matakuliah_id', 'name', 'status' ];
 
     public function user()
     {

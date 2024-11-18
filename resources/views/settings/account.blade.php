@@ -117,6 +117,7 @@
                                                     <div class="mb-4">
                                                         <x-inputs.input type="email" label="Your Email" id="email" name="name" placeholder="Your Email" aria-label="Your Email" value="{{ auth()->user()->email }}" required/>
                                                     </div>
+                                                
                                                 </div>
                                                 <div class="col-12">
                                                     <div
