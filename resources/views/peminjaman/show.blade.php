@@ -11,7 +11,7 @@
         <div class="card-body">
             <div class="invoice">
                 <div class="d-md-flex justify-content-between">
-                    <h3 class="text-center">Surat peminjaman</h3>
+                    <h3 class="text-center">Surat Peminjaman</h3>
                 </div>
                 <hr>
                 <div class="row">
@@ -21,7 +21,7 @@
                             <strong>{{ $peminjaman->user->name }}</strong><br>
                             {{ $peminjaman->user->email }}<br>
                             {{ $peminjaman->user->phone }}<br>
-                            Matakuliah {{ $peminjaman->matakuliah->name }}<br>
+                            Matakuliah: {{ $peminjaman->matakuliah->name }}<br>
                         </address>
                     </div>
                     <div class="col-md-6 text-md-right">
@@ -32,37 +32,84 @@
                     </div>
                 </div>
 
-                <div class="row">
-                    @foreach ($peminjaman->prasat as $prasat)
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="note-title text-truncate w-75 mb-0">{{ $prasat->nama_prasat }}</h6>
-                                    <p class="note-date fs-2">{{ Carbon\Carbon::parse($prasat->created_at)->format('Y-m-d') }}</p>
+                <div class="row mt-4">
+    @php $prasatCounter = 1; @endphp
+    @foreach ($peminjaman->prasat as $prasat)
+        @if($prasat->barangByprasat->count() > 0 || $prasat->peminjaman_barang_lainya->count() > 0)
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h6 class="note-title text-truncate w-75 mb-0">{{ $prasat->nama_prasat }}</h6>
+                        <p class="note-date fs-2">{{ Carbon\Carbon::parse($prasat->created_at)->format('Y-m-d') }}</p>
 
-                                    <table class="table mt-3">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Nama Barang</th>
-                                                <th>Quantity (Qty)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($prasat->barangByprasat as $barang)
-                                                <tr>
-                                                    <td>{{ $loop->iteration }}</td>
-                                                    <td>{{ $barang->barang->nama_barang }}</td>
-                                                    <td>{{ $barang->qty }}</td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
+                        <!-- Tabel Barang By Prasat -->
+                        @if($prasat->barangByprasat->count() > 0)
+                            <h5 class="mt-3">Barang Prasat</h5>
+                            <table class="table mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Nama Barang</th>
+                                        <th>Quantity (Qty)</th>
+                                        <th>Gambar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($prasat->barangByprasat as $barangIndex => $barang)
+                                        <tr>
+                                            <td>{{ $prasatCounter }}.{{ $barangIndex + 1 }}</td>
+                                            <td>{{ $barang->barang->nama_barang }}</td>
+                                            <td>{{ $barang->qty }}</td>
+                                            <td>
+                                                <span>No image</span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+
+                        <!-- Tabel Barang Lainnya -->
+                        @if($prasat->peminjaman_barang_lainya->count() > 0)
+                            <h5 class="mt-3">Barang Lainnya</h5>
+                            <table class="table mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Nama Barang</th>
+                                        <th>Quantity (Qty)</th>
+                                        <th>Gambar</th>
+                                        <th>Estimasi Harga</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($prasat->peminjaman_barang_lainya as $barangLainnyaIndex => $barangLainnya)
+                                        <tr>
+                                            <td>{{ $prasatCounter }}.{{ $barangLainnyaIndex + 1 }}</td>
+                                            <td>{{ $barangLainnya->nama_barang }}</td>
+                                            <td>{{ $barangLainnya->jumlah }}</td>
+                                            <td>
+                                                @if($barangLainnya->gambar)
+                                                    <img src="{{ asset('upload/gambar/' . $barangLainnya->gambar) }}" 
+                                                         alt="{{ $barangLainnya->nama_barang }}" 
+                                                         width="100">
+                                                @else
+                                                    <span>No image</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $barangLainnya->estimasi_harga }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+                    </div>
                 </div>
+            </div>
+            @php $prasatCounter++; @endphp
+        @endif
+    @endforeach
+</div>
             </div>
         </div>
 

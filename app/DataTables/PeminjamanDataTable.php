@@ -54,6 +54,9 @@ class PeminjamanDataTable extends DataTable
             ->editColumn('created_at', function($query) {
                 return Carbon::parse($query->created_at)->format('d-m-Y');
             })
+            ->addColumn('prasat', function($query) {
+                return $query->prasat->pluck('nama_prasat')->implode('<br> ');
+            })
             ->editColumn('status', function($query) {
                 $status = $query->status;
                 $badgeClass = match ($status) {
@@ -65,7 +68,7 @@ class PeminjamanDataTable extends DataTable
                 return "<span class='{$badgeClass}'>". ucfirst($status) ."</span>";
             })
             ->setRowId('id')
-            ->rawColumns(['action', 'user_id', 'matakuliah_id', 'created_at', 'status', 'id']);
+            ->rawColumns(['action', 'user_id', 'matakuliah_id', 'created_at', 'status', 'id','prasat']);
     }
 
     /**
@@ -131,6 +134,8 @@ class PeminjamanDataTable extends DataTable
             Column::make('user_id')->title('User'),
             Column::make('matakuliah_id')->title(value: 'Mata Kuliah'),
             Column::make('jadwal')->title('Tanggal'),
+            Column::make('prasat')->title('Prasat'),
+
             Column::make('status')->title('Status'),
             Column::computed('action')
                   ->exportable(false)

@@ -22,97 +22,119 @@ class PeminjamanController extends Controller
     }
 
     public function create(Request $request)
-    {
-        // get auth role name 
-     
-        try {
-            $peminjaman = Peminjaman::create([
-                'user_id' => auth()->user()->id,
-                'name' => auth()->user()->name,
-                'matakuliah_id' => $request->matakuliah_id,
-                'status' => 'pending',
-                'jadwal' => $request->jadwal ?? now(),
-                'npm' => $request->npm ?? "tidak ada npm",
-                'type' => auth()->user()->getRoleNames()->first(),
-                'code' => 'P' . time(),
-                
-            ]);
-    
+{
+    try {
+        // Validate request first
+        $validated = $request->validate([
+            'nama_prasat' => 'required|array',
+            'matakuliah_id' => 'required',
+            'jadwal' => 'required',
+            'npm' => 'required',
+        ]);
+
+        $peminjaman = Peminjaman::create([
+            'user_id' => auth()->user()->id,
+            'name' => auth()->user()->name,
+            'matakuliah_id' => $request->matakuliah_id,
+            'status' => 'pending',
+            'jadwal' => $request->jadwal ?? now(),
+            'npm' => $request->npm ?? "tidak ada npm",
+            'type' => auth()->user()->getRoleNames()->first(),
+            'code' => 'P' . time(),
+        ]);
+
+        // Check if nama_prasat exists and is an array
+        if ($request->has('nama_prasat') && is_array($request->nama_prasat)) {
             foreach ($request->nama_prasat as $prasatIndex => $namaPrasat) {
                 $prasat = Prasat::create([
                     'peminjaman_id' => $peminjaman->id,
                     'nama_prasat' => $namaPrasat,
                     'type' => 'peminjaman',
                 ]);
-    
-                if (isset($request->barang_id[$prasatIndex]) && isset($request->qty[$prasatIndex])) {
+
+                // Check if barang_id and qty exist for this prasat
+                if (isset($request->barang_id[$prasatIndex]) && 
+                    isset($request->qty[$prasatIndex]) && 
+                    is_array($request->barang_id[$prasatIndex]) && 
+                    is_array($request->qty[$prasatIndex])) {
+                    
                     foreach ($request->barang_id[$prasatIndex] as $barangIndex => $barangId) {
-                        $qty = $request->qty[$prasatIndex][$barangIndex];
-    
-                        $barang = Barang::find($barangId);
-                        if ($barang) {
-                            BarangByPrasat::create([
-                                'prasat_id' => $prasat->id,
-                                'barang_id' => $barang->id,
-                                'qty' => is_numeric($qty) ? (int)$qty : 0, 
-                            ]);
-                        } else {
-                            throw new \Exception("Barang dengan ID: $barangId tidak ditemukan untuk prasat index: $prasatIndex");
-                        }
-                    }
-                } else {
-                    throw new \Exception("ID Barang atau Qty tidak valid untuk prasat index: $prasatIndex");
-                }
-            }
-    
-            if ($request->has('nama_prasat_lain') && !empty($request->nama_prasat_lain)) {
-                foreach ($request->nama_prasat_lain as $key => $value) {
-                    if (!empty($value)) {
-                        $prasat = Prasat::create([
-                            'peminjaman_id' => $peminjaman->id,
-                            'nama_prasat' => $value,
-                            'type' => 'peminjaman',
-                        ]);
-            
-                        $gambarName = null;
-                        if (isset($request->gambar[$key]) && $request->gambar[$key]) {
-                            $gambar = $request->file('gambar')[$key];
-                            if ($gambar instanceof \Illuminate\Http\UploadedFile) {
-                                $gambarName = time() . '_' . $request->nama_prasat_lain[$key] . '.' . $gambar->getClientOriginalExtension();
-                                $gambar->storeAs('upload/gambar', $gambarName);
+                        if (isset($request->qty[$prasatIndex][$barangIndex])) {
+                            $qty = $request->qty[$prasatIndex][$barangIndex];
+                            $barang = Barang::find($barangId);
+                            
+                            if ($barang) {
+                                BarangByPrasat::create([
+                                    'prasat_id' => $prasat->id,
+                                    'barang_id' => $barang->id,
+                                    'qty' => is_numeric($qty) ? (int)$qty : 0,
+                                ]);
                             } else {
-                                throw new \Exception('Invalid file upload for key: ' . $key);
+                                throw new \Exception("Barang dengan ID: $barangId tidak ditemukan untuk prasat index: $prasatIndex");
                             }
                         }
-            
-                        PeminjamanBarangLainya::create([
-                            'prasat_id' => $prasat->id,
-                            'nama_barang' => $request->nama_barang_lain[$key],
-                            'jumlah' => $request->jumlah_barang_lain[$key],
-                            'estimasi_harga' => $request->estimasi_harga_barang_lain[$key],
-                            'gambar' => $gambarName,
-                        ]);
                     }
                 }
-            } else {
-                throw new \Exception('Field nama_prasat_lain tidak boleh kosong.');
             }
-            
-            
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-    
-        return response()->json(['success' => true, 'message' => 'Peminjaman created successfully', '_token' => csrf_token()]);
-  
-    }
 
+        // Handle nama_prasat_lain
+        if ($request->has('nama_prasat_lain') && is_array($request->nama_prasat_lain)) {
+            foreach ($request->nama_prasat_lain as $key => $value) {
+                if (!empty($value)) {
+                    $prasat = Prasat::create([
+                        'peminjaman_id' => $peminjaman->id,
+                        'nama_prasat' => $value,
+                        'type' => 'peminjaman',
+                    ]);
+
+                    $gambarName = null;
+                    
+                    // Check if gambar exists and is valid
+                    if (isset($request->gambar[$key]) && 
+                        is_array($request->gambar[$key]) && 
+                        isset($request->gambar[$key][0]) && 
+                        $request->gambar[$key][0] instanceof \Illuminate\Http\UploadedFile) {
+                        
+                        $gambar = $request->gambar[$key][0];
+                        $gambarName = time() . '_' . $gambar->getClientOriginalName();
+                        $gambar->move(public_path('upload/gambar'), $gambarName);
+                    }
+
+                    // Check if all required arrays and indices exist
+                    $namaBarang = isset($request->nama_barang_lain[$key][0]) ? $request->nama_barang_lain[$key][0] : null;
+                    $jumlah = isset($request->jumlah_lain[$key][0]) ? $request->jumlah_lain[$key][0] : 0;
+                    $estimasiHarga = isset($request->estimasi_harga[$key][0]) ? $request->estimasi_harga[$key][0] : 0;
+
+                    PeminjamanBarangLainya::create([
+                        'prasat_id' => $prasat->id,
+                        'nama_barang' => $namaBarang,
+                        'jumlah' => $jumlah,
+                        'estimasi_harga' => $estimasiHarga,
+                        'gambar' => $gambarName,
+                    ]);
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Peminjaman created successfully', 
+            '_token' => csrf_token()
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+}
     public function show($id)
     {
-        $peminjaman = Peminjaman::find($id);
+     
+        $peminjaman = Peminjaman::with('prasat','prasat.barangByPrasat','prasat.peminjaman_barang_lainya')->findOrFail($id);
         if (!$peminjaman) {
             return response()->json(['success' => false, 'message' => 'Peminjaman not found'], 404);
         }
+        // return $peminjaman;  
         return view('peminjaman.show', compact('peminjaman'));
     }
 

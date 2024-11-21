@@ -27,5 +27,10 @@ class Prasat extends Model
     {
         return $this->hasMany(PengajuanBarangLainya::class);
     }
+    // peminjaman barang lainya
+    public function peminjaman_barang_lainya()  
+    {
+        return $this->hasMany(PeminjamanBarangLainya::class);
+    }
     
 }
