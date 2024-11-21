@@ -97,16 +97,18 @@ Route::prefix('matakuliah')->group(function () {
 Route::prefix('pengajuan')->group(function () {
     Route::name('pengajuan.')->group(function () {
         Route::controller(PengajuanController::class)->group(function(){
+
             Route::get('/', 'index')->name('index')->middleware('role_or_permission:superadmin|view pengajuan');
-            // form
             Route::get('/form', 'form')->name('form')->middleware('role_or_permission:superadmin|create pengajuan');
             Route::post('/', 'create')->name('create')->middleware('role_or_permission:superadmin|create pengajuan');
-            Route::get('/{id}/edit', 'edit')->name('edit')->middleware('role_or_permission:superadmin|edit pengajuan');
+            Route::get('/{id}/edio', 'edit')->name('edit')->middleware('role_or_permission:superadmin|edit pengajuan');
             Route::get('/{id}', 'show')->name('show')->middleware('role_or_permission:superadmin|view pengajuan');
             Route::put('/{id}/edit', 'update')->name('update')->middleware('role_or_permission:superadmin|edit pengajuan');
             Route::delete('/{id}/delete', 'destroy')->name('delete')->middleware('role_or_permission:superadmin|delete pengajuan');
             Route::get('/{id}/download', 'download')->name('download')->middleware('role_or_permission:superadmin|view pengajuan');
+            // test
         });
+        
         Route::post('/{id}/approve', [ApprovalPengajuanController::class, 'approve'])->name('approve')->middleware('role_or_permission:superadmin|approve pengajuan');
     });
 });
@@ -118,7 +120,7 @@ Route::prefix('peminjaman')->group(function () {
             Route::get('/', 'index')->name('index')->middleware('role_or_permission:superadmin|view peminjaman');
             Route::post('/', 'create')->name('create')->middleware('role_or_permission:superadmin|create peminjaman');
             Route::get('/test/form','form')->name('form')->middleware('role_or_permission:superadmin|create peminjaman');
-            Route::post('/{id}/edit', 'edit')->name('edit')->middleware('role_or_permission:superadmin|edit peminjaman');
+            Route::get('/{id}/edit', 'edit')->name('edit')->middleware('role_or_permission:superadmin|edit peminjaman');
             Route::get('/{id}', 'show')->name('show')->middleware('role_or_permission:superadmin|view peminjaman');
             Route::put('/{id}/edit', 'update')->name('update')->middleware('role_or_permission:superadmin|edit peminjaman');
             Route::delete('/{id}/delete', 'destroy')->name('delete')->middleware('role_or_permission:superadmin|delete peminjaman');

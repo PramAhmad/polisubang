@@ -140,34 +140,106 @@ class PeminjamanController extends Controller
 
     public function edit($id)
     {
-        $peminjaman = Peminjaman::find($id);
+        // dd("ppp");
+        $peminjaman = Peminjaman::findOrFail($id);
+        $barangs = Barang::all();
+        $matakuliahs = Matakuliah::all();
+        return view('peminjaman.edit', compact('peminjaman','barangs','matakuliahs'));
 
-        if (!$peminjaman) {
-            return response()->json(['success' => false, 'message' => 'Peminjaman not found'], 404);
-        }
+     }
 
-        return response()->json(['success' => true, 'data' => $peminjaman, '_token' => csrf_token()]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'name' =>'required|min:3|max:100'
-        ]);
-
-        $peminjaman = Peminjaman::find($id);
-
-        if (!$peminjaman) {
-            return response()->json(['success' => false, 'message' => 'Peminjaman not found'], 404);
-        }
-
-        $update = $request->all();
-
-        $peminjaman->update($update);
-
-        return response()->json(['success' => true, 'message' => 'Peminjaman update successfully', '_token' => csrf_token()]);
-    }
-
+     public function update(Request $request, $id)
+     {
+         $peminjaman = Peminjaman::find($id);
+         if (!$peminjaman) {
+             return response()->json(['success' => false, 'message' => 'peminjaman not found'], 404);
+         }
+     
+         try {
+             $peminjaman->update([
+                 'user_id' => auth()->user()->id,
+                 'name' => auth()->user()->name,
+                 'matakuliah_id' => $request->matakuliah_id,
+                 'status' => 'pending',
+             ]);
+     
+             $existingPrasatIds = [];
+     
+             foreach ($request->nama_prasat as $prasatIndex => $namaPrasat) {
+                 $prasat = Prasat::where('peminjaman_id', $peminjaman->id)
+                     ->where('nama_prasat', $namaPrasat)
+                     ->first();
+     
+                 if (!$prasat) {
+                     $prasat = Prasat::create([
+                         'peminjaman_id' => $peminjaman->id,
+                         'nama_prasat' => $namaPrasat,
+                         'type' => 'peminjaman'
+                     ]);
+                 }
+     
+                 $existingPrasatIds[] = $prasat->id;
+     
+                 if (isset($request->barang_id[$prasatIndex]) && isset($request->qty[$prasatIndex])) {
+                     BarangByPrasat::where('prasat_id', $prasat->id)->delete();
+     
+                     foreach ($request->barang_id[$prasatIndex] as $barangIndex => $barangId) {
+                         $qty = $request->qty[$prasatIndex][$barangIndex];
+                         $barang = Barang::find($barangId);
+                         
+                         if ($barang) {
+                             BarangByPrasat::create([
+                                 'prasat_id' => $prasat->id,
+                                 'barang_id' => $barang->id,
+                                 'qty' => is_numeric($qty) ? (int)$qty : 0
+                             ]);
+                         } else {
+                             throw new \Exception("Barang dengan ID: $barangId tidak ditemukan untuk prasat index: $prasatIndex");
+                         }
+                     }
+                 }
+             }
+     
+             if ($request->has('nama_prasat_lain') && !empty($request->nama_prasat_lain)) {
+                 foreach ($request->nama_prasat_lain as $key => $value) {
+                     if (!empty($value)) {
+                         $prasat = Prasat::create([
+                             'peminjaman_id' => $peminjaman->id,
+                             'nama_prasat' => $value,
+                             'type' => 'peminjaman'
+                         ]);
+     
+                         $existingPrasatIds[] = $prasat->id;
+     
+                         $gambarName = null;
+                         if (isset($request->gambar[$key]) && $request->gambar[$key]) {
+                             $gambar = $request->file('gambar')[$key];
+                             $gambarName = time() . '_' . $gambar->getClientOriginalName();
+                             $gambar->storeAs('upload/gambar', $gambarName);
+                         }
+     
+                         peminjamanBarangLainya::create([
+                             'prasat_id' => $prasat->id,
+                             'nama_barang' => $request->nama_barang_lain[$key],
+                             'jumlah' => $request->jumlah_barang_lain[$key],
+                             'estimasi_harga' => $request->estimasi_harga_barang_lain[$key],
+                             'gambar' => $gambarName
+                         ]);
+                     }
+                 }
+             }
+     
+             Prasat::where('peminjaman_id', $peminjaman->id)
+                 ->whereNotIn('id', $existingPrasatIds)
+                 ->delete();
+     
+         } catch (\Exception $e) {
+             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+         }
+     
+         return redirect()->route('peminjaman.index')->with('success', 'peminjaman updated successfully');
+     }
+     
     public function destroy($id)
     {
         $peminjaman = Peminjaman::find($id);

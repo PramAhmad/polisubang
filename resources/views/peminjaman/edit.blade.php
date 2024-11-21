@@ -23,17 +23,17 @@
     </style>
     @endpush
     
-    <x-slot:title>Edit Pengajuan</x-slot>
+    <x-slot:title>Edit peminjaman</x-slot>
     <div class="card bg-info-subtle shadow-none position-relative overflow-hidden mb-4">
         <div class="card-body px-4 py-3">
             <div class="row align-items-center">
                 <div class="col-9">
-                    <h4 class="fw-semibold mb-8">Edit Pengajuan</h4>
+                    <h4 class="fw-semibold mb-8">Edit peminjaman</h4>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a class="text-muted" href="{{ route('home') }}">Home</a></li>
-                            <li class="breadcrumb-item"><a class="text-muted" href="{{ route('pengajuan.index') }}">Pengajuan</a></li>
-                            <li class="breadcrumb-item" aria-current="page">Edit Pengajuan</li>
+                            <li class="breadcrumb-item"><a class="text-muted" href="{{ route('peminjaman.index') }}">peminjaman</a></li>
+                            <li class="breadcrumb-item" aria-current="page">Edit peminjaman</li>
                         </ol>
                     </nav>
                 </div>
@@ -43,12 +43,12 @@
 
     <x-cards.card>
         <div class="mb-3">
-            <x-inputs.form class="form-pengajuan" id="editPengajuanForm">
+            <x-inputs.form class="form-peminjaman" id="editpeminjamanForm">
                 @method('PUT')
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <x-inputs.input id="name" name="name" label="Nama" value="{{ $pengajuan->name }}" />
+                            <x-inputs.input id="name" name="name" label="Nama" value="{{ $peminjaman->name }}" />
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -57,7 +57,7 @@
                                 <option value="">Pilih Matakuliah</option>
                                 @foreach ($matakuliahs as $matakuliah)
                                 <option value="{{ $matakuliah->id }}" 
-                                    {{ $pengajuan->matakuliah_id == $matakuliah->id ? 'selected' : '' }}>
+                                    {{ $peminjaman->matakuliah_id == $matakuliah->id ? 'selected' : '' }}>
                                     {{ $matakuliah->name }}
                                 </option>
                                 @endforeach
@@ -68,7 +68,7 @@
 
                 <!-- Dynamic Prasat Section -->
                 <div id="dynamicPrasat">
-                    @foreach($pengajuan->prasat as $index => $prasat)
+                    @foreach($peminjaman->prasat as $index => $prasat)
                     <div class="card p-3 shadow-md my-3 prasat-card">
                         <div class="card-title">
                             <div class="d-flex justify-content-between align-items-center">
@@ -163,7 +163,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            let prasatIndex = `{{ count($pengajuan->prasat) }}`;
+            let prasatIndex = `{{ count($peminjaman->prasat) }}`;
             console.log(prasatIndex);
 
             // Function to add new Prasat
@@ -293,24 +293,24 @@
             });
 
             // Form Submit Handler
-            $('#editPengajuanForm').submit(function(e) {
+            $('#editpeminjamanForm').submit(function(e) {
                 e.preventDefault();
                 var formData = new FormData(this);
                 
                 $.ajax({
                     type: 'POST',
-                    url: `{{ route('pengajuan.update', $pengajuan->id) }}`,
+                    url: `{{ route('peminjaman.update', $peminjaman->id) }}`,
                     data: formData,
                     cache: false,
                     contentType: false,
                     processData: false,
                     beforeSend: function() {
                         $('.btn-save').html('<div class="spinner-border spinner-border-sm" role="status"></div>').prop('disabled', true);
-                        $('#editPengajuanForm').find('.error-message').remove();
+                        $('#editpeminjamanForm').find('.error-message').remove();
                     },
                     success: function(response) {
                         toastr.success(`${response.message}`, "Success");
-                        window.location.href = `{{ route('pengajuan.index') }}`;
+                        window.location.href = `{{ route('peminjaman.index') }}`;
                     },
                     error: function(xhr, status, error) {
                         if (xhr.responseJSON) {

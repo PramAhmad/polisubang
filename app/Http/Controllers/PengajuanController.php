@@ -127,7 +127,6 @@ class PengajuanController extends Controller
     public function update(Request $request, $id)
     {
         $pengajuan = Pengajuan::find($id);
-    
         if (!$pengajuan) {
             return response()->json(['success' => false, 'message' => 'Pengajuan not found'], 404);
         }
@@ -140,49 +139,53 @@ class PengajuanController extends Controller
                 'status' => 'pending',
             ]);
     
+            $existingPrasatIds = [];
+    
             foreach ($request->nama_prasat as $prasatIndex => $namaPrasat) {
-                $prasat = Prasat::updateOrCreate(
-                    [
+                $prasat = Prasat::where('pengajuan_id', $pengajuan->id)
+                    ->where('nama_prasat', $namaPrasat)
+                    ->first();
+    
+                if (!$prasat) {
+                    $prasat = Prasat::create([
                         'pengajuan_id' => $pengajuan->id,
                         'nama_prasat' => $namaPrasat,
                         'type' => 'pengajuan'
-                    ]
-                );
+                    ]);
+                }
+    
+                $existingPrasatIds[] = $prasat->id;
     
                 if (isset($request->barang_id[$prasatIndex]) && isset($request->qty[$prasatIndex])) {
+                    BarangByPrasat::where('prasat_id', $prasat->id)->delete();
+    
                     foreach ($request->barang_id[$prasatIndex] as $barangIndex => $barangId) {
                         $qty = $request->qty[$prasatIndex][$barangIndex];
-    
                         $barang = Barang::find($barangId);
+                        
                         if ($barang) {
-                            BarangByPrasat::updateOrCreate(
-                                [
-                                    'prasat_id' => $prasat->id,
-                                    'barang_id' => $barang->id,
-                                ],
-                                [
-                                    'qty' => is_numeric($qty) ? (int)$qty : 0
-                                ]
-                            );
+                            BarangByPrasat::create([
+                                'prasat_id' => $prasat->id,
+                                'barang_id' => $barang->id,
+                                'qty' => is_numeric($qty) ? (int)$qty : 0
+                            ]);
                         } else {
                             throw new \Exception("Barang dengan ID: $barangId tidak ditemukan untuk prasat index: $prasatIndex");
                         }
                     }
-                } else {
-                    throw new \Exception("ID Barang atau Qty tidak valid untuk prasat index: $prasatIndex");
                 }
             }
     
             if ($request->has('nama_prasat_lain') && !empty($request->nama_prasat_lain)) {
                 foreach ($request->nama_prasat_lain as $key => $value) {
                     if (!empty($value)) {
-                        $prasat = Prasat::updateOrCreate(
-                            [
-                                'pengajuan_id' => $pengajuan->id,
-                                'nama_prasat' => $value,
-                                'type' => 'pengajuan'
-                            ]
-                        );
+                        $prasat = Prasat::create([
+                            'pengajuan_id' => $pengajuan->id,
+                            'nama_prasat' => $value,
+                            'type' => 'pengajuan'
+                        ]);
+    
+                        $existingPrasatIds[] = $prasat->id;
     
                         $gambarName = null;
                         if (isset($request->gambar[$key]) && $request->gambar[$key]) {
@@ -191,20 +194,20 @@ class PengajuanController extends Controller
                             $gambar->storeAs('upload/gambar', $gambarName);
                         }
     
-                        PengajuanBarangLainya::updateOrCreate(
-                            [
-                                'prasat_id' => $prasat->id,
-                                'nama_barang' => $request->nama_barang_lain[$key]
-                            ],
-                            [
-                                'jumlah' => $request->jumlah_barang_lain[$key],
-                                'estimasi_harga' => $request->estimasi_harga_barang_lain[$key],
-                                'gambar' => $gambarName
-                            ]
-                        );
+                        PengajuanBarangLainya::create([
+                            'prasat_id' => $prasat->id,
+                            'nama_barang' => $request->nama_barang_lain[$key],
+                            'jumlah' => $request->jumlah_barang_lain[$key],
+                            'estimasi_harga' => $request->estimasi_harga_barang_lain[$key],
+                            'gambar' => $gambarName
+                        ]);
                     }
                 }
             }
+    
+            Prasat::where('pengajuan_id', $pengajuan->id)
+                ->whereNotIn('id', $existingPrasatIds)
+                ->delete();
     
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
