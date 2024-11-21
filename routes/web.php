@@ -122,7 +122,7 @@ Route::prefix('peminjaman')->group(function () {
             Route::get('/{id}', 'show')->name('show')->middleware('role_or_permission:superadmin|view peminjaman');
             Route::put('/{id}/edit', 'update')->name('update')->middleware('role_or_permission:superadmin|edit peminjaman');
             Route::delete('/{id}/delete', 'destroy')->name('delete')->middleware('role_or_permission:superadmin|delete peminjaman');
-            Route::get('/{id}/download', 'download')->name('download')->middleware('role_or_permission:superadmin|view pengajuan');
+            Route::get('/{id}/download', 'download')->name('download')->middleware('role_or_permission:superadmin|view peminjaman');
         });
         Route::post('/{id}/approve', [ApprovalPeminjamanController::class, 'approve'])->name('approve')->middleware('role_or_permission:superadmin|approve pengajuan');
     });
