@@ -105,7 +105,7 @@ Route::prefix('pengajuan')->group(function () {
             Route::get('/{id}', 'show')->name('show')->middleware('role_or_permission:superadmin|view pengajuan');
             Route::put('/{id}/edit', 'update')->name('update')->middleware('role_or_permission:superadmin|edit pengajuan');
             Route::delete('/{id}/delete', 'destroy')->name('delete')->middleware('role_or_permission:superadmin|delete pengajuan');
-            Route::get('/{id}/download', 'download')->name('download')->middleware('role_or_permission:superadmin|download pengajuan');
+            Route::get('/{id}/download', 'download')->name('download')->middleware('role_or_permission:superadmin|view pengajuan');
         });
         Route::post('/{id}/approve', [ApprovalPengajuanController::class, 'approve'])->name('approve')->middleware('role_or_permission:superadmin|approve pengajuan');
     });
@@ -122,7 +122,7 @@ Route::prefix('peminjaman')->group(function () {
             Route::get('/{id}', 'show')->name('show')->middleware('role_or_permission:superadmin|view peminjaman');
             Route::put('/{id}/edit', 'update')->name('update')->middleware('role_or_permission:superadmin|edit peminjaman');
             Route::delete('/{id}/delete', 'destroy')->name('delete')->middleware('role_or_permission:superadmin|delete peminjaman');
-            Route::get('/{id}/download', 'download')->name('download')->middleware('role_or_permission:superadmin|download pengajuan');
+            Route::get('/{id}/download', 'download')->name('download')->middleware('role_or_permission:superadmin|view pengajuan');
         });
         Route::post('/{id}/approve', [ApprovalPeminjamanController::class, 'approve'])->name('approve')->middleware('role_or_permission:superadmin|approve pengajuan');
     });
