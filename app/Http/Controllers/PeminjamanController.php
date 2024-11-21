@@ -77,8 +77,12 @@ class PeminjamanController extends Controller
                         $gambarName = null;
                         if (isset($request->gambar[$key]) && $request->gambar[$key]) {
                             $gambar = $request->file('gambar')[$key];
-                            $gambarName = time() . '_' . $request->nama_prasat_lain[$key] . '.' . $gambar->getClientOriginalExtension();
-                            $gambar->storeAs('upload/gambar', $gambarName);
+                            if ($gambar instanceof \Illuminate\Http\UploadedFile) {
+                                $gambarName = time() . '_' . $request->nama_prasat_lain[$key] . '.' . $gambar->getClientOriginalExtension();
+                                $gambar->storeAs('upload/gambar', $gambarName);
+                            } else {
+                                throw new \Exception('Invalid file upload for key: ' . $key);
+                            }
                         }
             
                         PeminjamanBarangLainya::create([
@@ -93,6 +97,7 @@ class PeminjamanController extends Controller
             } else {
                 throw new \Exception('Field nama_prasat_lain tidak boleh kosong.');
             }
+            
             
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
