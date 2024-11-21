@@ -77,7 +77,7 @@ class PeminjamanController extends Controller
                         $gambarName = null;
                         if (isset($request->gambar[$key]) && $request->gambar[$key]) {
                             $gambar = $request->file('gambar')[$key];
-                            $gambarName = time() . '_' . $gambar->getClientOriginalName();
+                            $gambarName = time() . '_' . $request->nama_prasat_lain[$key] . '.' . $gambar->getClientOriginalExtension();
                             $gambar->storeAs('upload/gambar', $gambarName);
                         }
             
