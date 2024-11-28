@@ -109,7 +109,7 @@ Route::prefix('pengajuan')->group(function () {
             // test
         });
         
-        Route::post('/{id}/approve', [ApprovalPengajuanController::class, 'approve'])->name('approve')->middleware('role_or_permission:superadmin|approve pengajuan');
+        Route::post('/{id}/approve', [ApprovalPengajuanController::class, 'approve'])->name('approve')->middleware('role_or_permission:superadmin|approval pengajuan');
     });
 });
 
@@ -126,6 +126,6 @@ Route::prefix('peminjaman')->group(function () {
             Route::delete('/{id}/delete', 'destroy')->name('delete')->middleware('role_or_permission:superadmin|delete peminjaman');
             Route::get('/{id}/download', 'download')->name('download')->middleware('role_or_permission:superadmin|view peminjaman');
         });
-        Route::post('/{id}/approve', [ApprovalPeminjamanController::class, 'approve'])->name('approve')->middleware('role_or_permission:superadmin|approve pengajuan');
+        Route::post('/{id}/approve', [ApprovalPeminjamanController::class, 'approve'])->name('approve')->middleware('role_or_permission:superadmin|approval peminjaman');
     });
 });
