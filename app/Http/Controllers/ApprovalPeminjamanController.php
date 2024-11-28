@@ -16,5 +16,7 @@ class ApprovalPeminjamanController extends Controller
             'status' => $request->status,
             'keterangan' => $request->keterangan ?? '',
         ]);
+
+        return redirect()->back()->with('success', 'Peminjaman berhasil diapprove');
     }
 }
