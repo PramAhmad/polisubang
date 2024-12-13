@@ -27,8 +27,13 @@ class BarangDataTable extends DataTable
                 return view('datatable-actions.barang', compact('query'));
             })
             ->editColumn('expired', function($query) {
-                return $query->expired == 'Ya' ? '<span class="badge bg-danger ">Ya</span>' : '<span class="badge bg-success ">Tidak</span>';
+                if ($query->tanggal_expired > now()) {
+                    return '<span class="badge badge-success">Ya</span>';
+                } else {
+                    return '<span class="badge badge-danger">Tidak</span>';
+                }
             })
+            
             ->editColumn('type', function($query) {
                 // alat / bahan
                 return $query->type == 'alat' ? '<span class="badge bg-primary ">Alat</span>' : '<span class="badge bg-info ">Bahan</span>';
