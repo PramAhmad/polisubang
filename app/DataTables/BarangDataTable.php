@@ -28,9 +28,9 @@ class BarangDataTable extends DataTable
             })
             ->editColumn('expired', function($query) {
                 if ($query->tanggal_expired > now()) {
-                    return '<span class="badge badge-success">Ya</span>';
+                    return '<span class="badge badge-primary">Ya</span>';
                 } else {
-                    return '<span class="badge badge-danger">Tidak</span>';
+                    return '<span class="badge badge-warning">Tidak</span>';
                 }
             })
             
@@ -109,7 +109,7 @@ class BarangDataTable extends DataTable
             Column::make('nama_barang'),
             Column::make('type'),
 
-            Column::computed('expired'),
+            Column::computed('is_expired'),
             Column::make('jumlah'),
             Column::make('tanggal_expired'),
             Column::make('kondisi'),
