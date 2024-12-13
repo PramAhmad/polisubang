@@ -47,7 +47,7 @@ class BarangDataTable extends DataTable
         
             })
             ->setRowId('id')
-            ->rawColumns(['role', 'expired','type']);
+            ->rawColumns(['role', 'expired','type','expired']);
     }
 
     /**
@@ -109,7 +109,7 @@ class BarangDataTable extends DataTable
             Column::make('nama_barang'),
             Column::make('type'),
 
-            Column::make('expired'),
+            Column::computed('expired'),
             Column::make('jumlah'),
             Column::make('tanggal_expired'),
             Column::make('kondisi'),
