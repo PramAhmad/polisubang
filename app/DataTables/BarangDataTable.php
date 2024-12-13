@@ -28,9 +28,9 @@ class BarangDataTable extends DataTable
             })
             ->editColumn('is_expired', function($query) {
                 if ($query->tanggal_expired < now()) {
-                    return '<span class="badge badge-primary">Ya</span>';
+                    return '<span class="badge bg-primary">Ya</span>';
                 } else {
-                    return '<span class="badge badge-warning">Tidak</span>';
+                    return '<span class="badge bg-warning">Tidak</span>';
                 }
             })
             
