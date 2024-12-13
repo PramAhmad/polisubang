@@ -27,7 +27,7 @@ class BarangDataTable extends DataTable
                 return view('datatable-actions.barang', compact('query'));
             })
             ->editColumn('is_expired', function($query) {
-                if ($query->tanggal_expired > now()) {
+                if ($query->tanggal_expired < now()) {
                     return '<span class="badge badge-primary">Ya</span>';
                 } else {
                     return '<span class="badge badge-warning">Tidak</span>';
@@ -47,7 +47,7 @@ class BarangDataTable extends DataTable
         
             })
             ->setRowId('id')
-            ->rawColumns(['role', 'expired','type','expired']);
+            ->rawColumns(['role', 'expired','type','is_expired']);
     }
 
     /**
