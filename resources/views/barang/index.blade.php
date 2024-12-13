@@ -76,15 +76,15 @@
             <!-- type -->
             <div class="form-group mb-2">
                 <x-inputs.select id="type" name="type" class="" label="Type" required>
-                    <option value="barang">Barang</option>
+                    <option value="bahan">Barang</option>
                     <option value="alat">Alat</option>
                 </x-inputs.select>
             </div>  
             <div class="form-group mb-2">
                 <!-- kondisi select baik/rusak -->
                 <x-inputs.select id="kondisi" name="kondisi" class="" label="Kondisi" required>
-                    <option value="baik">Baik</option>
-                    <option value="rusak">Rusak</option>
+                    <option value="Baik">Baik</option>
+                    <option value="Rusak">Rusak</option>
                 </x-inputs.select>
             </div>
             <div class="form-group mb-2">
